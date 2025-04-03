@@ -141,3 +141,5 @@ dist
 *.css.map
 *.sass.map
 *.scss.map
+
+package-lock.json
