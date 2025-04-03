@@ -136,7 +136,27 @@
 		}
 
 		function handlePageSelect() {
-			loadDatabaseProperties();
+			const pageSelect = document.getElementById('pageSelect');
+			const selectedPageId = pageSelect.value;
+
+			// Find the selected page
+			const selectedPage = pages.find(page => page.id === selectedPageId);
+
+			// Populate the address input field with the page name
+			if (selectedPage) {
+				let title = "Untitled";
+				if (selectedPage.properties.Name && selectedPage.properties.Name.title && selectedPage.properties.Name.title.length > 0) {
+					title = selectedPage.properties.Name.title[0].plain_text;
+				} else if (selectedPage.properties.Title && selectedPage.properties.Title.title && selectedPage.properties.Title.title.length > 0) {
+					title = selectedPage.properties.Title.title[0].plain_text;
+				}
+				document.getElementById('addressInput').value = title;
+			}
+
+			// Pre-select the "address" property
+			const propertySelect = document.getElementById('propertySelect');
+			propertySelect.innerHTML = '<option value="Address">Address</option>';
+			propertySelect.value = "Address";
 		}
 
 		function initializeMap() {

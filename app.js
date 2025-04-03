@@ -43,8 +43,8 @@ app.get('/api/database', async (req, res) => {
 		});
 		res.json(database);
 	} catch (error) {
-		console.error('Error retrieving database:', error);
-		res.status(500).json({ error: 'Failed to retrieve database' });
+		console.error('Error retrieving database:', error.stack); // Log full error stack
+		res.status(500).json({ error: 'Failed to retrieve database', message: error.message }); // Include error message
 	}
 });
 
@@ -53,39 +53,27 @@ app.post('/api/update-address', async (req, res) => {
 	const { pageId, propertyName, address, placeId, lat, lng } = req.body;
 
 	try {
+		 // Build properties object dynamically
+		const properties = {
+			[propertyName]: {
+				rich_text: [{
+					text: {
+						content: address
+					}
+				}]
+			}
+		};
+
 		// Update the page with the address data
 		const response = await notion.pages.update({
 			page_id: pageId,
-			properties: {
-				[propertyName]: {
-					rich_text: [{
-						text: {
-							content: address
-						}
-					}]
-				},
-				// Optional: Store additional metadata in separate properties if they exist
-				"Place ID": {
-					rich_text: [{
-						text: {
-							content: placeId
-						}
-					}]
-				},
-				"Coordinates": {
-					rich_text: [{
-						text: {
-							content: `${lat},${lng}`
-						}
-					}]
-				}
-			}
+			properties
 		});
 
 		res.json({ success: true, response });
 	} catch (error) {
-		console.error('Error updating page:', error);
-		res.status(500).json({ error: 'Failed to update page' });
+		console.error('Error updating page:', error.stack); // Log full error stack
+		res.status(500).json({ error: 'Failed to update page', message: error.message }); // Include error message
 	}
 });
 
@@ -98,14 +86,19 @@ app.get('/api/pages', async (req, res) => {
 		});
 		res.json(response);
 	} catch (error) {
-		console.error('Error querying database:', error);
-		res.status(500).json({ error: 'Failed to query database' });
+		console.error('Error querying database:', error.stack); // Log full error stack
+		res.status(500).json({ error: 'Failed to query database', message: error.message }); // Include error message
 	}
 });
 
 // Endpoint to expose Google API Key
 app.get('/api/google-api-key', (req, res) => {
-	res.json({ apiKey: process.env.GOOGLE_API_KEY });
+	try {
+		res.json({ apiKey: process.env.GOOGLE_API_KEY });
+	} catch (error) {
+		console.error('Error exposing Google API Key:', error.stack); // Log full error stack
+		res.status(500).json({ error: 'Failed to expose Google API Key', message: error.message }); // Include error message
+	}
 });
 
 // Create HTTP server with Express
