@@ -167,7 +167,8 @@
 
 			autocomplete = new google.maps.places.Autocomplete(
 				document.getElementById('addressInput'),
-				{ types: ['address'] }
+				// Allow searching by place names, addresses, etc.
+				{ types: ['geocode', 'establishment'] }
 			);
 
 			autocomplete.addListener('place_changed', fillInAddress);
