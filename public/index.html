@@ -27,18 +27,14 @@
 <body>
 	<div class="container">
 		<h1>Notion Address Autocomplete</h1>
-		<p class="lead">Select a page and property to add a location with autocomplete.</p>
+		<p class="lead">Select a page to add a location with autocomplete.</p>
 
 		<div class="card mb-4">
 			<div class="card-body">
-				<h5 class="card-title">Select Page and Property</h5>
+				<h5 class="card-title">Select Page</h5>
 				<div class="mb-3">
 					<label for="pageSelect" class="form-label">Notion Page</label>
 					<select id="pageSelect" class="form-select"></select>
-				</div>
-				<div class="mb-3">
-					<label for="propertySelect" class="form-label">Property for Address</label>
-					<select id="propertySelect" class="form-select"></select>
 				</div>
 			</div>
 		</div>
@@ -58,11 +54,25 @@
 			</div>
 		</div>
 
-		<div class="alert alert-success mt-3" id="successAlert" style="display: none;">
-			Address successfully saved to Notion!
+		<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="successModalLabel">Success</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						Address successfully saved to Notion!
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 	<script>
 		let map;
 		let autocomplete;
@@ -116,18 +126,11 @@
 				.then(response => response.json())
 				.then(data => {
 					databaseProperties = data.properties;
-					const propertySelect = document.getElementById('propertySelect');
-					propertySelect.innerHTML = '<option value="">Select a property...</option>';
 
-					// Only show text-based properties
-					Object.entries(databaseProperties).forEach(([key, property]) => {
-						if (property.type === 'rich_text' || property.type === 'title' || property.type === 'url') {
-							const option = document.createElement('option');
-							option.value = key;
-							option.textContent = key;
-							propertySelect.appendChild(option);
-						}
-					});
+					// Check if "Address" property exists
+					if (!databaseProperties.Address) {
+						alert('The selected page does not have an "Address" property.');
+					}
 				})
 				.catch(error => {
 					console.error('Error loading database properties:', error);
@@ -153,10 +156,8 @@
 				document.getElementById('addressInput').value = title;
 			}
 
-			// Pre-select the "address" property
-			const propertySelect = document.getElementById('propertySelect');
-			propertySelect.innerHTML = '<option value="Address">Address</option>';
-			propertySelect.value = "Address";
+			 // Load database properties to check for "Address"
+			loadDatabaseProperties();
 		}
 
 		function initializeMap() {
@@ -213,10 +214,10 @@
 
 		function saveAddressToNotion() {
 			const pageId = document.getElementById('pageSelect').value;
-			const propertyName = document.getElementById('propertySelect').value;
+			const propertyName = "Address";
 
-			if (!pageId || !propertyName || !placeData) {
-				alert('Please select a page, property, and address');
+			if (!pageId || !placeData) {
+				alert('Please select a page and address');
 				return;
 			}
 
@@ -239,11 +240,8 @@
 				.then(response => response.json())
 				.then(data => {
 					if (data.success) {
-						const successAlert = document.getElementById('successAlert');
-						successAlert.style.display = 'block';
-						setTimeout(() => {
-							successAlert.style.display = 'none';
-						}, 3000);
+						const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+						successModal.show();
 					} else {
 						throw new Error('Failed to update Notion');
 					}
