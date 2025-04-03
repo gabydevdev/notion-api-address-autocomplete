@@ -103,6 +103,11 @@ app.get('/api/pages', async (req, res) => {
   }
 });
 
+// Endpoint to expose Google API Key
+app.get('/api/google-api-key', (req, res) => {
+  res.json({ apiKey: process.env.GOOGLE_API_KEY });
+});
+
 // Create HTTP server with Express
 const server = http.createServer(app);
 

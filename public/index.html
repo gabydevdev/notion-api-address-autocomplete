@@ -140,12 +140,20 @@
 		}
 
 		function initializeMap() {
-			// Load Google Maps and Places API
-			const script = document.createElement('script');
-			script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAkJ376dtAjODmJj1ReLs-KFb0PXjW72iI&libraries=places&callback=initAutocomplete`;
-			script.async = true;
-			script.defer = true;
-			document.head.appendChild(script);
+			 // Fetch the Google API key from the server
+			fetch('/api/google-api-key')
+				.then(response => response.json())
+				.then(data => {
+					const script = document.createElement('script');
+					script.src = `https://maps.googleapis.com/maps/api/js?key=${data.apiKey}&libraries=places&callback=initAutocomplete`;
+					script.async = true;
+					script.defer = true;
+					document.head.appendChild(script);
+				})
+				.catch(error => {
+					console.error('Error loading Google API key:', error);
+					alert('Failed to load Google API key');
+				});
 		}
 
 		function initAutocomplete() {
