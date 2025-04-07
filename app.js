@@ -1,13 +1,3 @@
-// var http = require('http');
-// var server = http.createServer(function(req, res) {
-//     res.writeHead(200, {'Content-Type': 'text/plain'});
-//     var message = 'It works!\n',
-//         version = 'NodeJS ' + process.versions.node + '\n',
-//         response = [message, version].join('\n');
-//     res.end(response);
-// });
-// server.listen();
-
 // Import required modules
 const http = require('http');
 const express = require('express');
@@ -50,17 +40,96 @@ app.get('/api/database', async (req, res) => {
 
 // Endpoint to update a page with an address
 app.post('/api/update-address', async (req, res) => {
-	const { pageId, propertyName, address, placeId, lat, lng } = req.body;
+	// Extract locality, state, and country from the request body
+	const { pageId, propertyName, address, placeId, lat, lng, url, website, name, locality, state, country } = req.body;
+
+	// Ensure these values are defined or default to empty strings
+	const localityValue = locality || '';
+	const stateValue = state || '';
+	const countryValue = country || '';
 
 	try {
-		 // Build properties object dynamically
+		// Retrieve the current page details
+		const page = await notion.pages.retrieve({ page_id: pageId });
+		const currentPageName = page.properties.title?.title?.[0]?.text?.content || '';
+
+		// Check if the name is different from the current page name
+		if (name && name !== currentPageName) {
+			// Update the page name
+			await notion.pages.update({
+				page_id: pageId,
+				properties: {
+					title: {
+						title: [
+							{
+								text: {
+									content: name
+								}
+							}
+						]
+					}
+				}
+			});
+		}
+
+		// Build properties object dynamically
 		const properties = {
 			[propertyName]: {
-				rich_text: [{
-					text: {
-						content: address
+				rich_text: [
+					{
+						text: {
+							content: address
+						}
 					}
-				}]
+				]
+			},
+			"Place ID": {
+				rich_text: [
+					{
+						text: {
+							content: placeId
+						}
+					}
+				]
+			},
+			"URL": {
+				url: url
+			},
+			"Website": {
+				url: website
+			},
+			"Latitude": {
+				rich_text: [
+					{
+						text: {
+							content: lat.toString()
+						}
+					}
+				]
+			},
+			"Longitude": {
+				rich_text: [
+					{
+						text: {
+							content: lng.toString()
+						}
+					}
+				]
+			},
+			"Locality": {
+				select: {
+					name: localityValue
+				}
+			},
+			"State": {
+				select: {
+					name: stateValue
+				}
+			},
+			"Country": {
+				select: {
+					name: countryValue
+				}
 			}
 		};
 

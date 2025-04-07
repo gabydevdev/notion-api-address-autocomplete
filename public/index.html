@@ -48,7 +48,7 @@
 				</div>
 				<div id="map"></div>
 				<div class="mt-3" id="addressDetails">
-					<p><strong>Selected Address:</strong> <span id="selectedAddress">None</span></p>
+					<p><strong>Selected Address:</strong> <span id="selectedAddress"></span></p>
 				</div>
 				<button id="saveButton" class="btn btn-primary mt-3" disabled>Save to Notion</button>
 			</div>
@@ -199,6 +199,34 @@
 			const place = autocomplete.getPlace();
 			placeData = place;
 
+			console.log('Selected place:', place);
+			console.log('place_id:', place.place_id);
+			console.log('url:', place.url);
+			console.log('website:', place.website);
+			console.log('name:', place.name);
+
+			// Extract state and country from address_components
+			let locality = '';
+			let state = '';
+			let country = '';
+			if (place.address_components) {
+				place.address_components.forEach(component => {
+					if (component.types.includes('locality') ) {
+						locality = component.long_name;
+					}
+					if (component.types.includes('administrative_area_level_1')) {
+						state = component.short_name;
+					}
+					if (component.types.includes('country')) {
+						country = component.long_name;
+					}
+				});
+			}
+
+			console.log('Locality:', locality);
+			console.log('State:', state);
+			console.log('Country:', country);
+
 			document.getElementById('selectedAddress').textContent = place.formatted_address;
 			document.getElementById('saveButton').disabled = false;
 
@@ -209,6 +237,9 @@
 					map: map,
 					position: place.geometry.location
 				});
+
+				console.log('Latitude:', place.geometry.location.lat());
+				console.log('Longitude:', place.geometry.location.lng());
 			}
 		}
 
@@ -226,8 +257,14 @@
 				propertyName: propertyName,
 				address: placeData.formatted_address,
 				placeId: placeData.place_id,
+				url: placeData.url || '',
+				website: placeData.website || '',
+				name: placeData.name || '',
 				lat: placeData.geometry.location.lat(),
-				lng: placeData.geometry.location.lng()
+				lng: placeData.geometry.location.lng(),
+				locality: placeData.address_components.find(component => component.types.includes('locality'))?.long_name || '',
+				state: placeData.address_components.find(component => component.types.includes('administrative_area_level_1'))?.short_name || '',
+				country: placeData.address_components.find(component => component.types.includes('country'))?.long_name || ''
 			};
 
 			fetch('/api/update-address', {
