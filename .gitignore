@@ -544,3 +544,5 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+prepros.config
