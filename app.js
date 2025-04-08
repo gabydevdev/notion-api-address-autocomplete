@@ -172,47 +172,58 @@ app.get('/api/google-api-key', (req, res) => {
 
 // Webhook endpoint to handle Notion events
 app.post('/api/webhook', async (req, res) => {
-  const event = req.body;
+	const event = req.body;
 
-  if (event.challenge) return res.status(200).send(event.challenge);
+	if (event.challenge) return res.status(200).send(event.challenge);
 
-  if (event.type === 'page.created') {
-    const pageId = event.entity.id;
+	console.log('Received webhook event:', event); // Log the received event
 
-    try {
-      const page = await notion.pages.retrieve({ page_id: pageId });
+	if (event.type === 'page.created') {
+		const pageId = event.entity.id;
 
-      const inputAddress = page.properties["Address"]?.rich_text?.[0]?.text?.content;
-      if (!inputAddress) return res.status(200).send('No address provided.');
+		try {
+			const page = await notion.pages.retrieve({ page_id: pageId });
 
-      // Call your autocomplete API (already implemented)
-      const autocompleteRes = await fetch('https://notion-api-address-autocomplete.blank-space.online/api/autocomplete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input: inputAddress })
-      });
+			const inputAddress = page.properties["Address"]?.rich_text?.[0]?.text?.content;
 
-      const data = await autocompleteRes.json();
+			console.log('Input address:', inputAddress); // Log the input address
 
-      // Update Notion page using your API
-      await fetch('https://notion-api-address-autocomplete.blank-space.online/api/update-address', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          pageId,
-          propertyName: "Address", // still the same
-          ...data // includes Website, URL, Latitude, Longitude, Locality, State, Country
-        })
-      });
+			if (!inputAddress) return res.status(200).send('No address provided.');
 
-      res.status(200).send('Autocomplete completed and fields updated');
-    } catch (error) {
-      console.error('Error processing webhook:', error);
-      res.status(500).send('Webhook processing failed');
-    }
-  } else {
-    res.status(200).send('Unhandled event type');
-  }
+			// Call your autocomplete API (already implemented)
+			const autocompleteRes = await fetch('https://notion-api-address-autocomplete.blank-space.online/api/autocomplete', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ input: inputAddress })
+			});
+
+			const data = await autocompleteRes.json();
+
+			console.log('Autocomplete data:', data); // Log the autocomplete data
+
+			console.log("Sending update to Notion:", pageId, data);
+
+			// Update Notion page using your API
+			await fetch('https://notion-api-address-autocomplete.blank-space.online/api/update-address', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					pageId,
+					propertyName: "Address", // still the same
+					...data // includes Website, URL, Latitude, Longitude, Locality, State, Country
+				})
+			});
+
+			console.log("Update address request body:", req.body); // Log the request body
+
+			res.status(200).send('Autocomplete completed and fields updated');
+		} catch (error) {
+			console.error('Error processing webhook:', error);
+			res.status(500).send('Webhook processing failed');
+		}
+	} else {
+		res.status(200).send('Unhandled event type');
+	}
 });
 
 // Create HTTP server with Express
