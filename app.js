@@ -170,6 +170,42 @@ app.get('/api/google-api-key', (req, res) => {
 	}
 });
 
+// Webhook endpoint to handle Notion events
+app.post('/api/webhook', async (req, res) => {
+	const event = req.body;
+
+	// Handle verification challenge
+	if (event.challenge) {
+		return res.status(200).send(event.challenge);
+	}
+
+	console.log('Received webhook event:', JSON.stringify(event, null, 2));
+
+	// Handle actual events (simplified)
+	for (const record of event.events || []) {
+		if (
+			record.event_type === 'page.updated' ||
+			record.event_type === 'page.properties.updated'
+		) {
+			const pageId = record.data.id;
+
+			// Use Notion SDK to fetch the current page data
+			// (Assuming you have a notion client set up already)
+			const page = await notion.pages.retrieve({ page_id: pageId });
+
+			// Your logic here:
+			// 1. Check if `Trigger Autocomplete` is true
+			// 2. Read the input address
+			// 3. Query Google Places API
+			// 4. Update the address field in Notion
+
+			console.log(`Handle autocomplete for page: ${pageId}`);
+		}
+	}
+
+	res.status(200).send('Event processed');
+});
+
 // Create HTTP server with Express
 const server = http.createServer(app);
 
