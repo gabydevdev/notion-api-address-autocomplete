@@ -172,38 +172,47 @@ app.get('/api/google-api-key', (req, res) => {
 
 // Webhook endpoint to handle Notion events
 app.post('/api/webhook', async (req, res) => {
-	const event = req.body;
+  const event = req.body;
 
-	// Handle verification challenge
-	if (event.challenge) {
-		return res.status(200).send(event.challenge);
-	}
+  if (event.challenge) return res.status(200).send(event.challenge);
 
-	console.log('Received webhook event:', JSON.stringify(event, null, 2));
+  if (event.type === 'page.created') {
+    const pageId = event.entity.id;
 
-	// Handle actual events (simplified)
-	for (const record of event.events || []) {
-		if (
-			record.event_type === 'page.updated' ||
-			record.event_type === 'page.properties.updated'
-		) {
-			const pageId = record.data.id;
+    try {
+      const page = await notion.pages.retrieve({ page_id: pageId });
 
-			// Use Notion SDK to fetch the current page data
-			// (Assuming you have a notion client set up already)
-			const page = await notion.pages.retrieve({ page_id: pageId });
+      const inputAddress = page.properties["Address"]?.rich_text?.[0]?.text?.content;
+      if (!inputAddress) return res.status(200).send('No address provided.');
 
-			// Your logic here:
-			// 1. Check if `Trigger Autocomplete` is true
-			// 2. Read the input address
-			// 3. Query Google Places API
-			// 4. Update the address field in Notion
+      // Call your autocomplete API (already implemented)
+      const autocompleteRes = await fetch('https://notion-api-address-autocomplete.blank-space.online/api/autocomplete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: inputAddress })
+      });
 
-			console.log(`Handle autocomplete for page: ${pageId}`);
-		}
-	}
+      const data = await autocompleteRes.json();
 
-	res.status(200).send('Event processed');
+      // Update Notion page using your API
+      await fetch('https://notion-api-address-autocomplete.blank-space.online/api/update-address', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pageId,
+          propertyName: "Address", // still the same
+          ...data // includes Website, URL, Latitude, Longitude, Locality, State, Country
+        })
+      });
+
+      res.status(200).send('Autocomplete completed and fields updated');
+    } catch (error) {
+      console.error('Error processing webhook:', error);
+      res.status(500).send('Webhook processing failed');
+    }
+  } else {
+    res.status(200).send('Unhandled event type');
+  }
 });
 
 // Create HTTP server with Express
