@@ -176,8 +176,6 @@ app.post('/api/webhook', async (req, res) => {
 
 	if (event.challenge) return res.status(200).send(event.challenge);
 
-	console.log('Received webhook event:', event); // Log the received event
-
 	if (event.type === 'page.created') {
 		const pageId = event.entity.id;
 

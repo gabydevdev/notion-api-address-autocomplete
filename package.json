@@ -1,36 +1,29 @@
 {
-  "name": "notion-api-address-autocomplete",
-  "version": "1.0.0",
-  "description": "A custom integration for Notion that adds address autocomplete functionality.",
-  "keywords": [
-    "places-autocomplete",
-    "places-api",
-    "notion-api"
-  ],
-  "homepage": "https://github.com/gabydevdev/notion-api-address-autocomplete#readme",
-  "bugs": {
-    "url": "https://github.com/gabydevdev/notion-api-address-autocomplete/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/gabydevdev/notion-api-address-autocomplete.git"
-  },
-  "license": "MIT",
-  "author": "gabydevdev",
-  "main": "app.js",
-  "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js"
-  },
-  "dependencies": {
-    "@notionhq/client": "^2.3.0",
-    "dotenv": "^16.4.7",
-    "express": "^5.1.0"
-  },
-  "engines": {
-    "node": ">=16.0.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.9"
-  }
+	"name": "notion-api-address-autocomplete",
+	"version": "1.0.0",
+	"description": "A custom integration for Notion that adds address autocomplete functionality.",
+	"keywords": [
+		"places-autocomplete",
+		"places-api",
+		"notion-api"
+	],
+	"homepage": "https://github.com/gabydevdev/notion-api-address-autocomplete#readme",
+	"bugs": {
+		"url": "https://github.com/gabydevdev/notion-api-address-autocomplete/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/gabydevdev/notion-api-address-autocomplete.git"
+	},
+	"license": "MIT",
+	"author": "gabydevdev",
+	"main": "app.js",
+	"scripts": {
+		"start": "node app.js"
+	},
+	"dependencies": {
+		"@notionhq/client": "^2.3.0",
+		"dotenv": "^16.4.7",
+		"express": "^5.1.0"
+	}
 }

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="x-ua-compatible" content="ie=edge" />
+
+	<title>(◍•﹏•) <!--#echo var="REDIRECT_STATUS" --></title>
+	<!-- <meta name="description" content=""> -->
+
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<!--
+	<link rel="manifest" href="site.webmanifest">
+	<link rel="apple-touch-icon" href="icon.png"> -->
+	<!-- Place favicon.ico in the root directory -->
+	<style>
+		body {
+			margin: 0.5rem;
+			color: royalblue;
+			background-color: lavender;
+			display: flex;
+			flex-flow: column;
+			max-width: 100%;
+			min-height: calc(100vh - 1rem);
+			font-size: clamp(1.1rem, 3.9636rem + -3.8182vw, 3.2rem);
+			line-height: 1.2;
+			overflow: hidden;
+		}
+
+		h1 {
+			margin: 0;
+			font-size: 1.5em;
+		}
+
+		img {
+			display: inline-block;
+			width: 100%;
+			max-width: 450px;
+			height: auto;
+		}
+
+		.oh-no {
+			margin-top: auto;
+			margin-bottom: 0;
+			display: inline-block;
+			max-width: 100%;
+			overflow: hidden;
+		}
+
+		.lil-icon {
+			text-wrap: nowrap;
+		}
+
+		/* Landscape */
+
+		@media screen and (orientation: landscape) {
+			body {
+				/*font-size: 9vw;*/
+			}
+
+			.oh-no {
+				text-align: right;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<h1><!--#echo var="REDIRECT_STATUS" --></h1>
+
+	<p>
+		You don't have permission to access this resource.
+		<span class="lil-icon">(◍•﹏•)</span>
+	</p>
+
+	<p class="oh-no" id="imageContainer">
+		<!-- <img src="https://blank-space.online/gif/403/403-1.webp" alt="Stop it!"> -->
+	</p>
+
+	<script>
+		// Function to generate image URLs dynamically
+
+		function generateImageUrls(baseUrl, prefix, count) {
+			return Array.from(
+				{ length: count },
+				(_, index) => `${baseUrl}${prefix}${index + 1}.webp`,
+			);
+		}
+
+		// Setup for generating URLs
+		const baseUrl = "https://blank-space.online/gif/403/";
+		const prefix = "image";
+		const numberOfImages = 4;
+
+		// Generate the array of image URLs
+		const images = generateImageUrls(baseUrl, prefix, numberOfImages);
+
+		// Function to select and display a random image
+		function setRandomImage() {
+			// Select a random index from the array
+			const randomIndex = Math.floor(Math.random() * images.length);
+
+			// Get the container div
+			const imageContainer = document.getElementById("imageContainer");
+
+			// Create an image element
+			const imgElement = document.createElement("img");
+
+			// Set the image source to the randomly selected URL
+			imgElement.src = images[randomIndex];
+
+			// Clear any existing content and add the new image
+			imageContainer.innerHTML = "";
+			imageContainer.appendChild(imgElement);
+		}
+
+		// Set random image when page loads
+		window.addEventListener("load", setRandomImage);
+	</script>
+</body>
+</html>
